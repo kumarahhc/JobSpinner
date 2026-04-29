@@ -1,3 +1,5 @@
+import json
+import re
 import autogen
 from config import LLM_CONFIG
 from tools.web_search import web_search
@@ -37,6 +39,7 @@ def create_job_search_agent() -> tuple:
 
         Note that the search quality matters more than quantity.
         If the first few results are not relevant, you should try to refine your search query and search again until you find relevant job postings
+        When you find minimum 5 jobs return the single word COMPLETE.
         ."""
     )
 
@@ -46,7 +49,8 @@ def create_job_search_agent() -> tuple:
         human_input_mode="NEVER",
         max_consecutive_auto_reply=5,
         code_execution_config=False,
-        default_auto_reply="Tool executed, Please continue."
+        default_auto_reply="Tool executed, Please continue.",
+        is_termination_msg=lambda msg: isinstance(msg, dict) and "COMPLETE" in (msg.get("content") or ""),
     )
 
     # Register the tool with the agent and the executor
@@ -58,4 +62,41 @@ def create_job_search_agent() -> tuple:
         description="Search the web for job listings based on the given job title, location, and keywords."
     )
     return job_search_agent, agent_executor
-    
+
+def extract_serched_jobs(chat_result) -> list:
+    """Extracts the job listings JSON array from the agent's chat history."""
+    for message in reversed(chat_result.chat_history):
+        content = message.get("content") or ""
+        if not content or content.strip() == "COMPLETE":
+            continue
+
+        # Try direct parse
+        try:
+            data = json.loads(content)
+            if isinstance(data, list) and data and isinstance(data[0], dict):
+                return data
+        except (json.JSONDecodeError, ValueError):
+            pass
+
+        # Try ```json ... ``` code block
+        match = re.search(r'```json\s*([\s\S]*?)\s*```', content)
+        if match:
+            try:
+                data = json.loads(match.group(1))
+                if isinstance(data, list) and data and isinstance(data[0], dict):
+                    return data
+            except (json.JSONDecodeError, ValueError):
+                pass
+
+        # Try finding first [ to last ]
+        start = content.find('[')
+        end = content.rfind(']')
+        if start != -1 and end > start:
+            try:
+                data = json.loads(content[start:end + 1])
+                if isinstance(data, list) and data and isinstance(data[0], dict):
+                    return data
+            except (json.JSONDecodeError, ValueError):
+                pass
+
+    return []

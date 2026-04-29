@@ -24,7 +24,7 @@ def web_search(job_title:str, location:str,keywords:list[str]=[], num_results:in
              f"site:linkedin.com OR site:indeed.com OR site:glassdoor.com OR site:jobs.fi")
     logging.info(f"Performing web search with query: {query}")
     try:
-        results = client.search(query=query, num_results=num_results,search_depth="advanced",include_answer=False)
+        results = client.search(query=query, num_results=num_results,search_depth="advanced",include_answer="advanced",include_sources=True,include_raw_content="text")
         logging.info(f"Web search returned {len(results)} results")
         jobs = []
         for result in results.get("results", []):
@@ -35,6 +35,7 @@ def web_search(job_title:str, location:str,keywords:list[str]=[], num_results:in
                 "description": result.get("content"),
                 "score": result.get("score", 0),
                 "source": urlparse(url).netloc,
+                "raw_content": result.get("raw_content", "")
             }
             jobs.append(job)
         return jobs
