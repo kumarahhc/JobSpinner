@@ -5,7 +5,7 @@ from config import LLM_CONFIG
 from tools.file_reader import read_cv_pdf
 
 #agent cv analizer
-def create_cv_analizer_agent() -> tuple:
+def create_cv_analizer_agent(executor=None) -> tuple:
     """
     Creates and return CV analizer agent : AG2 assistantAgent.
     agent_executor : UserProxyAgent that runs tool calls for the agent."""
@@ -65,7 +65,7 @@ def create_cv_analizer_agent() -> tuple:
     )
     
     #the executor that runs tool calls
-    agent_executor = autogen.UserProxyAgent(
+    agent_executor = executor or autogen.UserProxyAgent(
         name="CVAnalyzerAgentExecutor",
         human_input_mode="NEVER",
         max_consecutive_auto_reply=5,

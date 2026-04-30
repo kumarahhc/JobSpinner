@@ -8,7 +8,7 @@ from config import LLM_CONFIG
 from tools.document_writer import save_cover_letter_docx,save_latex_file,update_job_excel
 
 
-def create_doc_writer_agent() ->tuple:
+def create_doc_writer_agent(executor=None) ->tuple:
     """
     Create and return 
            doc_writer_agent : the AG2 AssistantAgent
@@ -22,6 +22,8 @@ def create_doc_writer_agent() ->tuple:
         name="Tailor",
         system_message="""You are an automated career document writer.
         You will receive a candidate profile and a list of job matches.
+        The job list is ordered based on the relavance_score, if not order the list based on relavance_score
+        take only the top 3 jobs.
 
         For EACH job in the list, you MUST complete ALL of the following steps before moving to the next job:
 
@@ -43,7 +45,7 @@ def create_doc_writer_agent() ->tuple:
         llm_config=LLM_CONFIG,
     )
 
-    tailor_user_proxy = autogen.UserProxyAgent(
+    tailor_user_proxy = executor or autogen.UserProxyAgent(
         name="User_Proxy",
         human_input_mode="NEVER",
         max_consecutive_auto_reply=50,

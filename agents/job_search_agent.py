@@ -3,8 +3,9 @@ import re
 import autogen
 from config import LLM_CONFIG
 from tools.web_search import web_search
+from tools.job_ranker import score_job_match
 
-def create_job_search_agent() -> tuple:
+def create_job_search_agent(executor=None) -> tuple:
     """Creates a job search agent that can search for job listings based on user input."""
 
     job_search_agent = autogen.AssistantAgent(
@@ -24,8 +25,13 @@ def create_job_search_agent() -> tuple:
         1. Call the search_jobs tool with appropriate parameters,
         2. Review the returned resutls carefully,
         3. Filter the results to ensure they match the candidate's preferences,
-        4. Return a list of relevant job postings, including the job title, company name, location, and a brief description,
-        5. You should not return any job postings that do not match the candidate's preferences.
+        4. Calculate the relevance score of each job by calling the score_job_match tool.
+           IMPORTANT: the score_job_match tool requires two arguments:
+           - cv_profile: pass the COMPLETE candidate profile as a JSON object (dict), NOT as a plain text summary.
+             Use the exact structured profile provided to you at the start of this conversation.
+           - job_posting: pass the job details as a JSON object with fields: title, company, location, description, content, url, source.
+        5. Return a list of relevant job postings, including the job title, company name, location, and a brief description,
+        6. You should not return any job postings that do not match the candidate's preferences.
 
         Format your response as a JSON array of job postings, where each posting includes the following fields:
         - title: The title of the job,
@@ -36,15 +42,19 @@ def create_job_search_agent() -> tuple:
         - url: The URL to the job posting,
         - score: A relevance score between 0 and 1 indicating how well the job matches the candidate's preferences,
         - source: The source of the job posting (e.g., LinkedIn, Indeed, etc.)
+        - relavance_score : total_score of tool score_job_match result
+        - reasoning: reaconing based on result of tool score_job_match
+        - score_breakdown: result from tool score_job_match
 
         Note that the search quality matters more than quantity.
         If the first few results are not relevant, you should try to refine your search query and search again until you find relevant job postings
+        Order the result based on the relavance_score
         When you find minimum 5 jobs return the single word COMPLETE.
         ."""
     )
 
     # The executor that runs tool calls
-    agent_executor = autogen.UserProxyAgent(
+    agent_executor = executor or autogen.UserProxyAgent(
         name="JobSearchAgentExecutor",
         human_input_mode="NEVER",
         max_consecutive_auto_reply=5,
@@ -60,6 +70,13 @@ def create_job_search_agent() -> tuple:
         executor=agent_executor,
         name="search_jobs",
         description="Search the web for job listings based on the given job title, location, and keywords."
+    )
+    autogen.register_function(
+        score_job_match,
+        caller=job_search_agent,
+        executor=agent_executor,
+        name="score_job_match",
+        description="Calculate the match score of a job against the candidate profile. Pass cv_profile as the full JSON object (not a text summary) and job_posting as a JSON object with title, company, location, description, content, url, source fields."
     )
     return job_search_agent, agent_executor
 

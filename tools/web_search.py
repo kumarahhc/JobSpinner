@@ -7,7 +7,7 @@ logging.basicConfig(level=logging.INFO)
 
 client = TavilyClient(api_key=TAVILY_CONFIG["api_key"])
 
-def web_search(job_title:str, location:str,keywords:list[str]=[], num_results:int=5) -> list[dict]:
+def web_search(job_title:str, location:str,keywords:list[str]=[], num_results:int=7) -> list[dict]:
     """_summary_
     Tool: Search the web for job listings based on the given job title, location, and keywords.
     Args:
@@ -24,7 +24,7 @@ def web_search(job_title:str, location:str,keywords:list[str]=[], num_results:in
              f"site:linkedin.com OR site:indeed.com OR site:glassdoor.com OR site:jobs.fi")
     logging.info(f"Performing web search with query: {query}")
     try:
-        results = client.search(query=query, num_results=num_results,search_depth="advanced",include_answer="advanced",include_sources=True,include_raw_content="text")
+        results = client.search(query=query, num_results=num_results,search_depth="basic",include_answer="advanced",include_sources=True)
         logging.info(f"Web search returned {len(results)} results")
         jobs = []
         for result in results.get("results", []):

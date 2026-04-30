@@ -15,6 +15,7 @@ def score_job_match(
     Returns:
         str: A relevance score between 0 and 1 indicating how well the job matches the candidate's profile.
     """
+    print(f"CV-PRIFILE:{cv_profile}")
     if isinstance(cv_profile, str):
         try:
             cv_profile = json.loads(cv_profile)
