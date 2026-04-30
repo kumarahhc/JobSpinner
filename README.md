@@ -1,7 +1,7 @@
 
 ### Contributors:
 1. Indika Perera        : Indika.Perera@oulu.fi
-2. Chaminda Hewa Hakuru : Kumara.Hewa@student.oulu.fi
+2. Chaminda Kumara Hewa Hakuru : Kumara.Hewa@student.oulu.fi
 # JobSpinner
 
 An AI-powered job search and application platform built with [AG2](https://github.com/ag2ai/ag2) (AutoGen) framework. JobSpinner accepts the CV and read it to build candidate's profile, searches the web for matching live job postings, scores them against candidate's profile, select most maching 3 jobs. Finally writes tailored cover letters for selected jobs, and logs every application to an Excel tracker.
