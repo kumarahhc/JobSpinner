@@ -1,22 +1,21 @@
 # JobSpinner
 
-An AI-powered job search and application platform built with [AG2](https://github.com/ag2ai/ag2) (AutoGen). JobSpinner reads your CV, searches the web for matching live job postings, scores them against your profile, writes tailored cover letters, and logs every application to an Excel tracker — all automatically.
+An AI-powered job search and application platform built with [AG2](https://github.com/ag2ai/ag2) (AutoGen) framework. JobSpinner accepts the CV and read it to build candidate's profile, searches the web for matching live job postings, scores them against candidate's profile, select most maching 3 jobs. Finally writes tailored cover letters for selected jobs, and logs every application to an Excel tracker.
 
 ---
 
 ## How it works
 
-JobSpinner runs three AI agents in sequence:
+The application runs on three AI agents orchestrated by executor in sequence. orchestrator is a UserProxyAgent that starts the conversation where 2nd and 3rd agents get the previous agnet's summarized output as the input. Each agent has to provide the summarized result to the next agent to process.
 
-```
-CV Analyzer  →  Job Search Agent  →  Doc Writer
-   (read CV)      (search & score)     (cover letters + Excel)
-```
+![agent communication](./agent_pattern.png)
 
-| Agent | What it does |
+
+
+| Agent | Description |
 |---|---|
-| **CV Analyzer** | Reads your PDF/TXT CV and extracts a structured profile (skills, experience, education, preferences) |
-| **Job Search Agent** | Searches LinkedIn, Indeed, Glassdoor and Finnish job boards for matching postings; scores each one against your profile |
+| **CV Analyzer** | Reads the CV in PDF or TEXT format and extracts a structured profile (skills, experience, education, preferences) |
+| **Job Search Agent** | Searches LinkedIn, Indeed, Glassdoor and Finnish job boards for matching postings; scores each one against candidate's profile |
 | **Doc Writer** | Writes a tailored cover letter for the top 3 jobs and logs them to an Excel file |
 
 Output files are saved to the `output/` folder.
