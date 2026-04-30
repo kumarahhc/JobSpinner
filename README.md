@@ -68,18 +68,17 @@ The model is configured in [config.py](config.py) — default is `openai/gpt-4.1
 ## Usage
 
 ### Full pipeline
-
-Place your CV (PDF or TXT) at `test/sample_cv.pdf`, then run:
+CV file (PDF or TXT) has to copy into /test folder in the project root with the name `sample_cv.pdf`, then run the system with following command
 
 ```bash
 python main.py
 ```
 
 The pipeline will:
-1. Analyze your CV
+1. Analyze the CV
 2. Search for at least 5 matching jobs
 3. Score and rank them
-4. Write cover letters and update the job tracker
+4. Write cover letters and update the job tracker (excel)
 
 Results are saved to `output/`:
 - `CoverLetter_<CompanyName>.docx` — one per job
@@ -110,11 +109,11 @@ JobSpinner/
 │   └── doc_writer_agent.py      # Cover letter + Excel writer agent
 ├── tools/
 │   ├── file_reader.py           # PDF / TXT reader
-│   ├── web_search.py            # Tavily job search wrapper
-│   ├── job_ranker.py            # Deterministic job match scoring
-│   └── document_writer.py       # .docx and .xlsx output helpers
+│   ├── web_search.py            # job search wrapper
+│   ├── job_ranker.py            # Score and job match
+│   └── document_writer.py       # write .docx and .xlsx helpers
 ├── test/
-│   ├── sample_cv.pdf            # Place your CV here
+│   ├── sample_cv.pdf            # Place CV here
 │   ├── test_cv_analyzer.py
 │   ├── test_job_search.py
 │   ├── test_job_matcher.py
@@ -122,14 +121,14 @@ JobSpinner/
 ├── output/                      # Generated files (created automatically)
 ├── config.py                    # LLM and API configuration
 ├── main.py                      # Entry point
-└── .env                         # API keys (not committed)
+└── .env                         # API keys (not committed to GitHub)
 ```
 
 ---
 
-## Scoring
+## Scoring Stratergy
 
-Each job is scored deterministically by [`tools/job_ranker.py`](tools/job_ranker.py) across five dimensions:
+Each job is scored by [`tools/job_ranker.py`](tools/job_ranker.py) across five dimensions:
 
 | Dimension | Weight |
 |---|---|
@@ -139,12 +138,12 @@ Each job is scored deterministically by [`tools/job_ranker.py`](tools/job_ranker
 | Language match | 5% |
 | Location match | 5% |
 
-Jobs scoring below 0.1 are filtered out. The top 3 are passed to the Doc Writer.
+Jobs scoring below 0.1 are filtered out. The top 3 are passed to the Doc Writer Agent.
 
 ---
 
 ## Notes
 
-- The pipeline uses a single `Orchestrator` agent as the executor for all tool calls, following the AG2 Sequential Chats pattern. This avoids duplicate tool registrations and function-override warnings.
-- Cover letters are limited to one A4 page and never hallucinate information not present in your CV.
+- The pipeline uses a single `Orchestrator` agent as the executor for all tool calls, following the AG2 Sequential Chats pattern.
+- Cover letters are limited to one A4 page and never hallucinate information not present in CV.
 - The Excel tracker prevents duplicate entries for the same company + role combination.
