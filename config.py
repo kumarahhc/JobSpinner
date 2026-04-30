@@ -29,3 +29,6 @@ TAVILY_CONFIG = {
 #----------- OUTPUT FOLDER ----------------
 OUTPUT_FOLDER = "output"
 os.makedirs(OUTPUT_FOLDER, exist_ok=True)
+
+#----------- CV INPUT FOLDER ----------------
+CV_FOLDER = os.path.abspath("test")
