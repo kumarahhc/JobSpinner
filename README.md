@@ -6,7 +6,7 @@ An AI-powered job search and application platform built with [AG2](https://githu
 
 ## How it works
 
-The application runs on three AI agents orchestrated by executor in sequence. orchestrator is a UserProxyAgent that starts the conversation where 2nd and 3rd agents get the previous agnet's summarized output as the input. Each agent has to provide the summarized result to the next agent to process..
+The application runs on three AI agents orchestrated by executor in sequence. orchestrator is a UserProxyAgent that starts the conversation where 2nd and 3rd agents get the previous agnet's summarized output as the input. Each agent has to provide the summarized result to the next agent to process.
 
 ![agent communication](./agent_pattern.png)
 
